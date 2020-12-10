@@ -4,10 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -22,6 +27,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // 화면을 켜진상태로 유지 https://developer.android.com/training/scheduling/wakelock?hl=ko
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         TextView day = findViewById(R.id.day_TextView);
         TextView day2 = findViewById(R.id.day2_TextView);
         TextView time = findViewById(R.id.time_TextView);
@@ -35,12 +43,30 @@ public class MainActivity extends AppCompatActivity {
         textViews[3] = ampm;
         textViews[4] = second;
 
+        ImageButton settingButton = findViewById(R.id.setting_ImageButton);
+        settingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        // SQLite DB 데이터 가져오기
+        SettingSQLiteQuery sqLiteQuery = new SettingSQLiteQuery(MainActivity.this);
+        if (sqLiteQuery.totalCount() != 0) {
+            SettingDTO data = sqLiteQuery.settingSelect();
+
+            for (int i = 0 ; i < textViews.length ; i++) {
+
+            }
+        }
+
         TimerHandler handler = new TimerHandler(textViews);
         TimerRunner runner = new TimerRunner(handler);
         Thread thread = new Thread(runner);
         thread.start();
     }
-
 
 }
 
