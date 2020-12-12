@@ -15,12 +15,17 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.example.watch.Util.Status;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+
+    private TextView[] textViews;
+    private int[][] colorRGB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,13 +35,16 @@ public class MainActivity extends AppCompatActivity {
         // 화면을 켜진상태로 유지 https://developer.android.com/training/scheduling/wakelock?hl=ko
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        // Color Setting
+        colorRGB = Status.setColor();
+
         TextView day = findViewById(R.id.day_TextView);
         TextView day2 = findViewById(R.id.day2_TextView);
         TextView time = findViewById(R.id.time_TextView);
         TextView ampm = findViewById(R.id.ampm_TextView);
         TextView second = findViewById(R.id.second_TextView);
 
-        TextView[] textViews = new TextView[5];
+        textViews = new TextView[5];
         textViews[0] = day;
         textViews[1] = day2;
         textViews[2] = time;
@@ -52,22 +60,46 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // SQLite DB 데이터 가져오기
-        SettingSQLiteQuery sqLiteQuery = new SettingSQLiteQuery(MainActivity.this);
-        if (sqLiteQuery.totalCount() != 0) {
-            SettingDTO data = sqLiteQuery.settingSelect();
-
-            for (int i = 0 ; i < textViews.length ; i++) {
-
-            }
-        }
-
         TimerHandler handler = new TimerHandler(textViews);
         TimerRunner runner = new TimerRunner(handler);
         Thread thread = new Thread(runner);
         thread.start();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // SQLite DB 데이터 가져오기
+        SettingSQLiteQuery sqLiteQuery = new SettingSQLiteQuery(MainActivity.this);
+
+        if (sqLiteQuery.totalCount() == 0) {
+            sqLiteQuery.settingInsert(12, 100);
+        } else {
+            SettingDTO data = sqLiteQuery.settingSelect();
+
+            Log.e(TAG, "dataColor = " + data.getColor() + " dataSize = " + data.getTextSize());
+
+            for (int i = 0 ; i < textViews.length ; i++) {
+                int textSize = data.getTextSize();
+
+                switch (i) {
+                    case 2 : // time TextView
+                        textViews[i].setTextSize((textSize + 20) / getDensity());
+                        break;
+                    default:
+                        textViews[i].setTextSize(textSize / getDensity());
+                        break;
+                }
+
+                textViews[i].setTextColor(Color.rgb(colorRGB[data.getColor()][0], colorRGB[data.getColor()][1], colorRGB[data.getColor()][2]));
+            }
+        }
+    }
+
+    private float getDensity() {
+        return getResources().getDisplayMetrics().density;
+    }
 }
 
 // TextView 를 배열로 받아서 날짜 출력

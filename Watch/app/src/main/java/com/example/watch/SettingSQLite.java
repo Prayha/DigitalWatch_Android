@@ -42,6 +42,7 @@ class SettingSQLiteQuery {
         setting = new SettingSQLite(context, "setting");
     }
 
+    // 전체 데이터 수 가져오기
     public int totalCount() {
         SQLiteDatabase DB = null;
         int count = 0;
@@ -67,6 +68,26 @@ class SettingSQLiteQuery {
         return count;
     }
 
+    public void settingInsert(int color, int textSize) {
+        SQLiteDatabase DB = null;
+
+        try {
+           DB = setting.getWritableDatabase();
+
+            String query = "INSERT INTO Setting(color, textSize) " +
+                    "VALUES (" + color + ", " + textSize + ");";
+            DB.execSQL(query);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (DB != null) {
+                DB.close();
+            }
+        }
+    }
+
+    // 가장 최신의 데이터 가져오기
     public SettingDTO settingSelect() {
         SQLiteDatabase DB = null;
         SettingDTO data = new SettingDTO(0, 0, 0);
@@ -91,6 +112,25 @@ class SettingSQLiteQuery {
         }
 
         return data;
+    }
+
+    // 데이터 수정
+    public void settingUpdate(int color, int textSize) {
+        SQLiteDatabase DB = null;
+
+        try {
+            DB = setting.getWritableDatabase();
+
+            String query = "UPDATE Setting SET color = " + color + ", textSize = " + textSize + "; ";
+
+            DB.execSQL(query);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (DB != null) {
+                DB.close();
+            }
+        }
     }
 
     public void settingCloes() {

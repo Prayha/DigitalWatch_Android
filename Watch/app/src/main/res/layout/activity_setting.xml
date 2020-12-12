@@ -6,28 +6,94 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/black"
+    android:background="@color/white"
+    android:padding="10dp"
     tools:context=".SettingActivity">
 
-    <com.example.watch.Custom.CustomView
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:background="@color/white"
-        />
-
-    <Button
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/subButton"
-        />
+        android:orientation="horizontal"
+        android:layout_marginBottom="10dp"
+        >
 
-    <TextView
-        android:id="@+id/subtextView"
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="8"
+            android:text="Color 선택"
+            android:textSize="70sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            />
+
+        <Button
+            android:id="@+id/update_Button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:background="@color/white"
+            app:backgroundTint="@color/white"
+            android:text="저장하기"
+            android:textColor="@color/black"
+            android:textSize="30sp"/>
+
+    </LinearLayout>
+
+    <GridView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/Color_Palette"
+        android:numColumns="14"
+        android:padding="10dp"
+        android:background="#BDBDBD"/>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="hi"
-        android:gravity="center"
-        android:textSize="10dp"
-        />
+        android:orientation="horizontal"
+        >
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="5"
+            >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Text Size 선택"
+                android:textSize="70sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                />
+
+            <EditText
+                android:id="@+id/textsize_EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="50sp"
+                android:hint="100"
+                android:inputType="number"
+                />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/example_TextView"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:background="@color/black"
+            android:gravity="center"
+            android:text="TEST"
+            android:textSize="50sp"
+            android:textColor="@color/white"
+            android:textAlignment="center"
+            />
+
+    </LinearLayout>
 
 </LinearLayout>
