@@ -13,9 +13,9 @@ import java.util.ArrayList;
 public class ColorPaletteAdapter extends BaseAdapter {
     private static final String TAG = "ColorPaletteAdapter";
 
-    Context context;
-    int[][] colorRGB;
-    int width, height;
+    private Context context;
+    private int[][] colorRGB;
+    private int width, height;
 
     public ColorPaletteAdapter(Context context, int[][] colorRGB, int width, int height) {
         this.context = context;

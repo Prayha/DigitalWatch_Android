@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
+// SQLite 생성
 public class SettingSQLite extends SQLiteOpenHelper {
 
     public SettingSQLite(@Nullable Context context, @Nullable String name) {
@@ -34,9 +35,10 @@ public class SettingSQLite extends SQLiteOpenHelper {
     }
 }
 
+// SQLite Query문
 class SettingSQLiteQuery {
 
-    SettingSQLite setting;
+    private SettingSQLite setting;
 
     public SettingSQLiteQuery(Context context) {
         setting = new SettingSQLite(context, "setting");
@@ -68,6 +70,7 @@ class SettingSQLiteQuery {
         return count;
     }
 
+    // Setting Insert
     public void settingInsert(int color, int textSize) {
         SQLiteDatabase DB = null;
 
@@ -133,6 +136,7 @@ class SettingSQLiteQuery {
         }
     }
 
+    // 닫기
     public void settingCloes() {
         setting.close();
     }

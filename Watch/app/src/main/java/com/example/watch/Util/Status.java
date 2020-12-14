@@ -1,5 +1,6 @@
 package com.example.watch.Util;
 
+// 색상 설정
 public class Status {
     public Status() {
 

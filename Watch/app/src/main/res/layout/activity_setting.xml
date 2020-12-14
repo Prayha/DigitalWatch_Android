@@ -44,7 +44,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/Color_Palette"
-        android:numColumns="14"
         android:padding="10dp"
         android:background="#BDBDBD"/>
 

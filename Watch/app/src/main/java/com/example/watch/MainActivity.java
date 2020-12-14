@@ -3,13 +3,11 @@ package com.example.watch;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -19,7 +17,14 @@ import com.example.watch.Util.Status;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
+
+/* -------------------------------------------------------------------------------------------------
+ *
+ * 앱이 실행이 되면 SQLite에 저장되어 있는 Setting 값을 가져온후 적용 시키고 (없으면 생성)
+ * Runnable , Handler 를 이용하여 오늘의 시간 을 구한뒤 TextView 에 각각 적용 시킨다.
+ *
+ * -------------------------------------------------------------------------------------------------
+ */
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -38,12 +43,14 @@ public class MainActivity extends AppCompatActivity {
         // Color Setting
         colorRGB = Status.setColor();
 
+        // TextView
         TextView day = findViewById(R.id.day_TextView);
         TextView day2 = findViewById(R.id.day2_TextView);
         TextView time = findViewById(R.id.time_TextView);
         TextView ampm = findViewById(R.id.ampm_TextView);
         TextView second = findViewById(R.id.second_TextView);
 
+        // TextView 배열
         textViews = new TextView[5];
         textViews[0] = day;
         textViews[1] = day2;
@@ -51,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         textViews[3] = ampm;
         textViews[4] = second;
 
+        // Setting Button 클릭시 Activity 이동
         ImageButton settingButton = findViewById(R.id.setting_ImageButton);
         settingButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,12 +68,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Timer 돌릴 Thread 실행
         TimerHandler handler = new TimerHandler(textViews);
         TimerRunner runner = new TimerRunner(handler);
         Thread thread = new Thread(runner);
         thread.start();
     }
 
+    // SQLite 에 Setting 가져와서 적용시키기
     @Override
     protected void onResume() {
         super.onResume();
@@ -73,13 +83,15 @@ public class MainActivity extends AppCompatActivity {
         // SQLite DB 데이터 가져오기
         SettingSQLiteQuery sqLiteQuery = new SettingSQLiteQuery(MainActivity.this);
 
+        // Data 가 없으면
         if (sqLiteQuery.totalCount() == 0) {
+            // 생성
             sqLiteQuery.settingInsert(12, 100);
         } else {
+            // 가져오기
             SettingDTO data = sqLiteQuery.settingSelect();
 
-            Log.e(TAG, "dataColor = " + data.getColor() + " dataSize = " + data.getTextSize());
-
+            // TextView 에서 Time 부분 (ex: 12:00) 시간 부분만 살짝 더 크게 TextSize 조절
             for (int i = 0 ; i < textViews.length ; i++) {
                 int textSize = data.getTextSize();
 
@@ -97,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Px to Dp
     private float getDensity() {
         return getResources().getDisplayMetrics().density;
     }
@@ -106,39 +119,41 @@ public class MainActivity extends AppCompatActivity {
 class TimerHandler extends Handler {
     private static final String TAG = "TimerHandler";
 
+    // 사용할 TextViews (MainActivity 에서 가져온 TextView)
     TextView[] textViews;
 
     public TimerHandler(TextView[] textViews) {
         this.textViews = textViews;
-
     }
 
     @Override
     public void handleMessage(@NonNull Message msg) {
+        // 시간 가져오기
         Calendar cal = Calendar.getInstance() ;
 
-        int year = cal.get(Calendar.YEAR);
-        int month = cal.get(Calendar.MONTH) + 1;
-        int date = cal.get(Calendar.DATE);
-        int week = cal.get(Calendar.DAY_OF_WEEK);
-        int hour = cal.get(Calendar.HOUR);
-        int hour24 = cal.get(Calendar.HOUR_OF_DAY);
-        int second = cal.get(Calendar.SECOND);
+        int year = cal.get(Calendar.YEAR); // 년도
+        int month = cal.get(Calendar.MONTH) + 1; // 월 (월은 0부터 시작이기에 + 1)
+        int date = cal.get(Calendar.DATE); // 일
+        int week = cal.get(Calendar.DAY_OF_WEEK); // 요일 (ex: 1 -> 일요일, 2 -> 월요일 등)
+        int hour = cal.get(Calendar.HOUR); // 시간 (12시 기준)
+        int hour24 = cal.get(Calendar.HOUR_OF_DAY); // 시간 (24시 기준)
+        int second = cal.get(Calendar.SECOND); // 초
 
         String str = year + "년 " + month + "월 " + date + "일";
         textViews[0].setText(str);
         str = WeekDistinction(week);
         textViews[1].setText(str);
-        SimpleDateFormat sdf = new SimpleDateFormat("mm");
+        SimpleDateFormat sdf = new SimpleDateFormat("mm"); // 분 을 두자릿수로 나타내기 위해 사용
         str = hour + " : " + sdf.format(cal.getTime());
         textViews[2].setText(str);
         str = AmPmDistinction(hour24);
         textViews[3].setText(str);
-        sdf = new SimpleDateFormat("ss");
+        sdf = new SimpleDateFormat("ss"); // 초 를 두자릿수로 나타내기 위해 사용
         str = ": " + sdf.format(cal.getTime());
         textViews[4].setText(str);
     }
 
+    // Calendar.DAY_OF_WEEK 의 내용을 받아서 String 으로 변환
     private String WeekDistinction (int num) {
         String week = "";
 
@@ -169,6 +184,7 @@ class TimerHandler extends Handler {
         return week;
     }
 
+    // Calendar.HOUR_OF_DAY 24시간을 받아서 오후 오전 String 변환
     private String AmPmDistinction(int num) {
         if (num - 12 > 0) {
             return "오후";
@@ -192,12 +208,12 @@ class TimerRunner implements Runnable {
     public void run() {
         while (true) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1000); // 1초 쉼
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            handler.sendEmptyMessage(0);
+            handler.sendEmptyMessage(0); // 아무런 내용이없는 Message 보내기
         }
     }
 }

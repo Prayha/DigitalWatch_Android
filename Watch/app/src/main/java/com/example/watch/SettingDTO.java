@@ -1,5 +1,6 @@
 package com.example.watch;
 
+// SQLite에서 사용하기위해 선언
 public class SettingDTO {
     int seqno;
     int color;
