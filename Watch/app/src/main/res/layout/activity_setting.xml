@@ -14,17 +14,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="10dp"
+        android:layout_marginTop="36sp"
+        android:layout_marginLeft="36sp"
+        android:layout_marginBottom="10sp"
         >
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="8"
-            android:text="Color 선택"
-            android:textSize="70sp"
+            android:text="글자 색상 선택"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textSize="48sp"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:textColor="#C9000000"
             />
 
         <Button
@@ -34,9 +37,10 @@
             android:layout_weight="2"
             android:background="@color/white"
             app:backgroundTint="@color/white"
-            android:text="저장하기"
-            android:textColor="@color/black"
-            android:textSize="30sp"/>
+            android:text="저장"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:textColor="#C9000000"
+            android:textSize="36sp"/>
 
     </LinearLayout>
 
@@ -44,12 +48,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/Color_Palette"
-        android:padding="10dp"
-        android:background="#BDBDBD"/>
+        android:background="#9E000000"
+        android:padding="1sp"
+        android:layout_marginLeft="36sp"
+        android:layout_marginRight="36sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="36sp"
         android:orientation="horizontal"
         >
 
@@ -63,10 +70,11 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Text Size 선택"
-                android:textSize="70sp"
+                android:text="글자 크기 설정"
+                android:textSize="48sp"
                 android:textStyle="bold"
-                android:textColor="@color/black"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:textColor="#C9000000"
                 />
 
             <EditText
@@ -74,6 +82,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="50sp"
+                android:layout_marginRight="24sp"
                 android:hint="100"
                 android:inputType="number"
                 />
@@ -85,12 +94,13 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="5"
-            android:background="@color/black"
+            android:background="#C9000000"
             android:gravity="center"
             android:text="TEST"
             android:textSize="50sp"
             android:textColor="@color/white"
             android:textAlignment="center"
+            android:padding="10sp"
             />
 
     </LinearLayout>
