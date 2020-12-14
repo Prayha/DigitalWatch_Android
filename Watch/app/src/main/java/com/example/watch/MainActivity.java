@@ -14,6 +14,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.example.watch.Util.Status;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -42,6 +47,20 @@ public class MainActivity extends AppCompatActivity {
 
         // Color Setting
         colorRGB = Status.setColor();
+
+        // Google ADs Developer 주소 -----
+        // https://developers.google.com/admob/android/banner?hl=ko
+
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
+
+        AdView mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+        // Google ADs Developer 주소 -----
 
         // TextView
         TextView day = findViewById(R.id.day_TextView);
