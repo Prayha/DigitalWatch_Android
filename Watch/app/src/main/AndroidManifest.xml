@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.watch">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -13,7 +15,7 @@
         <!-- Google ADs -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-2721211392199032~2307248343"/>
+            android:value="ca-app-pub-2721211392199032~6985259330"/>
 
         <activity android:name=".SettingActivity"
             android:screenOrientation="landscape">

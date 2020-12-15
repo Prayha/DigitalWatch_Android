@@ -50,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Google ADs Developer 주소 -----
         // https://developers.google.com/admob/android/banner?hl=ko
-
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override
             public void onInitializationComplete(InitializationStatus initializationStatus) {
@@ -163,13 +162,17 @@ class TimerHandler extends Handler {
         str = WeekDistinction(week);
         textViews[1].setText(str);
         SimpleDateFormat sdf = new SimpleDateFormat("mm"); // 분 을 두자릿수로 나타내기 위해 사용
-        str = hour + " : " + sdf.format(cal.getTime());
+        str = hour0to12(hour) + " : " + sdf.format(cal.getTime());
         textViews[2].setText(str);
         str = AmPmDistinction(hour24);
         textViews[3].setText(str);
         sdf = new SimpleDateFormat("ss"); // 초 를 두자릿수로 나타내기 위해 사용
         str = ": " + sdf.format(cal.getTime());
         textViews[4].setText(str);
+    }
+
+    private int hour0to12(int num) {
+        return num == 0 ? 12 : num;
     }
 
     // Calendar.DAY_OF_WEEK 의 내용을 받아서 String 으로 변환
