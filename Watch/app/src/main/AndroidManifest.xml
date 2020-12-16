@@ -13,9 +13,11 @@
         android:theme="@style/Theme.Watch">
 
         <!-- Google ADs -->
+        <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
+        <!-- REAL AdMob app ID: ca-app-pub-2721211392199032~6985259330 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-2721211392199032~6985259330"/>
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
 
         <activity android:name=".SettingActivity"
             android:screenOrientation="landscape">
