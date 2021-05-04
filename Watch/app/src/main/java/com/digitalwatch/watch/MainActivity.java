@@ -1,9 +1,11 @@
-package com.example.watch;
+package com.digitalwatch.watch;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.IntentSender;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,10 +15,20 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.example.watch.Util.Status;
+import com.digitalwatch.watch.Util.Status;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.InstallStatus;
+import com.google.android.play.core.install.model.UpdateAvailability;
+import com.google.android.play.core.tasks.Task;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import static com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE;
 
 /* -------------------------------------------------------------------------------------------------
  *
@@ -29,13 +41,21 @@ import java.util.Calendar;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
+    private static final int UPDATE_REQUEST_CODE = 777;
+
     private TextView[] textViews;
     private int[][] colorRGB;
+
+    AppUpdateManager appUpdateManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        appUpdateManager = AppUpdateManagerFactory.create(getApplicationContext());
+
+        AppUpdateCheck();
 
         // 화면을 켜진상태로 유지 https://developer.android.com/training/scheduling/wakelock?hl=ko
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -107,6 +127,55 @@ public class MainActivity extends AppCompatActivity {
                 textViews[i].setTextColor(Color.rgb(colorRGB[data.getColor()][0], colorRGB[data.getColor()][1], colorRGB[data.getColor()][2]));
             }
         }
+
+        appUpdateManager
+                .getAppUpdateInfo()
+                .addOnSuccessListener(
+                        appUpdateInfo -> {
+                            if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                                // If an in-app update is already running, resume the update.
+                                try {
+                                    appUpdateManager.startUpdateFlowForResult(
+                                            appUpdateInfo,
+                                            IMMEDIATE,
+                                            this,
+                                            UPDATE_REQUEST_CODE);
+                                } catch (IntentSender.SendIntentException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == UPDATE_REQUEST_CODE) {
+            if (resultCode == RESULT_CANCELED) {
+                AppUpdateCheck();
+            }
+        }
+    }
+
+    private void AppUpdateCheck() {
+        Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    && appUpdateInfo.isUpdateTypeAllowed(IMMEDIATE)) {
+                // Request the update.
+                try {
+                    appUpdateManager.startUpdateFlowForResult(
+                            appUpdateInfo,
+                            IMMEDIATE,
+                            this,
+                            UPDATE_REQUEST_CODE);
+                } catch (IntentSender.SendIntentException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     // Px to Dp

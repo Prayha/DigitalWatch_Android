@@ -1,4 +1,4 @@
-package com.example.watch;
+package com.digitalwatch.watch;
 
 import org.junit.Test;
 

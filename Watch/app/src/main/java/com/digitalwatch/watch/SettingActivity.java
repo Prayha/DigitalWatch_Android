@@ -1,4 +1,4 @@
-package com.example.watch;
+package com.digitalwatch.watch;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,8 +17,8 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import com.example.watch.Adapter.ColorPaletteAdapter;
-import com.example.watch.Util.Status;
+import com.digitalwatch.watch.Adapter.ColorPaletteAdapter;
+import com.digitalwatch.watch.Util.Status;
 
 /* -------------------------------------------------------------------------------------------------
  *

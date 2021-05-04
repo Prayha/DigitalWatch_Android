@@ -1,4 +1,4 @@
-package com.example.watch;
+package com.digitalwatch.watch;
 
 import android.content.Context;
 import android.database.Cursor;

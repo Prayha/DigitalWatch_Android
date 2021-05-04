@@ -1,4 +1,4 @@
-package com.example.watch.Adapter;
+package com.digitalwatch.watch.Adapter;
 
 import android.content.Context;
 import android.graphics.Color;

@@ -1,4 +1,4 @@
-package com.example.watch.Util;
+package com.digitalwatch.watch.Util;
 
 // 색상 설정
 public class Status {

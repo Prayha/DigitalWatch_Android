@@ -1,4 +1,4 @@
-package com.example.watch;
+package com.digitalwatch.watch;
 
 // SQLite에서 사용하기위해 선언
 public class SettingDTO {
