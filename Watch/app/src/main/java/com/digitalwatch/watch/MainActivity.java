@@ -10,11 +10,24 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeParams;
+import com.android.billingclient.api.ConsumeResponseListener;
+import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesUpdatedListener;
+import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.SkuDetailsParams;
+import com.android.billingclient.api.SkuDetailsResponseListener;
 import com.digitalwatch.watch.Util.Status;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
@@ -26,7 +39,9 @@ import com.google.android.play.core.install.model.UpdateAvailability;
 import com.google.android.play.core.tasks.Task;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import static com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE;
 
@@ -48,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
 
     AppUpdateManager appUpdateManager;
 
+    private BillingClient billingClient;
+    private List<SkuDetails> skuDetails;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         appUpdateManager = AppUpdateManagerFactory.create(getApplicationContext());
 
+        // App 업데이트 체크
         AppUpdateCheck();
 
         // 화면을 켜진상태로 유지 https://developer.android.com/training/scheduling/wakelock?hl=ko
@@ -85,6 +104,75 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, SettingActivity.class);
                 startActivity(intent);
+            }
+        });
+
+        // 인앱 결제 세팅
+        skuDetails = new ArrayList<>();
+
+        // BillingClient 초기화
+        billingClient = BillingClient.newBuilder(this)
+                .setListener(purchasesUpdatedListener)
+                .enablePendingPurchases()
+                .build();
+
+        // Google Play 연결 설정
+        billingClient.startConnection(new BillingClientStateListener() {
+            @Override
+            public void onBillingSetupFinished(BillingResult billingResult) {
+                if (billingResult.getResponseCode() ==  BillingClient.BillingResponseCode.OK) {
+                    // The BillingClient is ready. You can query purchases here.
+                    Log.e(TAG, "onBillingSetupFinished");
+
+                    // Google Play 구입 가능한 제품 표시
+                    List<String> skuList = new ArrayList<>();
+                    skuList.add("donation_0001"); // 등록한 인앱상품 ID
+                    skuList.add("donation_0002");
+
+                    SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder();
+                    params.setSkusList(skuList).setType(BillingClient.SkuType.INAPP);
+                    billingClient.querySkuDetailsAsync(params.build(),
+                            new SkuDetailsResponseListener() {
+                                @Override
+                                public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetailsList) {
+                                    Log.e(TAG, "onSkuDetailsResponse");
+
+                                    if (skuDetailsList == null) {
+                                        Log.e(TAG, "skuDetailsList is NULL");
+                                        return;
+                                    }
+
+                                    if (skuDetailsList.size() == 0) {
+                                        Log.e(TAG, "skuDetailsList is size 0");
+                                        return;
+                                    }
+
+                                    // Process the result.
+                                    skuDetails.addAll(skuDetailsList);
+                                }
+                            });
+                }
+            }
+            @Override
+            public void onBillingServiceDisconnected() {
+                // Try to restart the connection on the next request to
+                // Google Play by calling the startConnection() method.
+            }
+        });
+
+        // Donation Button 클릭시 인앱 결제
+        findViewById(R.id.donation_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (skuDetails.size() == 0) {
+                    return;
+                }
+
+                BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
+                        .setSkuDetails(skuDetails.get(0))
+                        .build();
+
+                billingClient.launchBillingFlow(MainActivity.this, billingFlowParams).getResponseCode();
             }
         });
 
@@ -142,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
                                             UPDATE_REQUEST_CODE);
                                 } catch (IntentSender.SendIntentException e) {
                                     e.printStackTrace();
-                                }
+                                    }
                             }
                         });
     }
@@ -152,8 +240,12 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == UPDATE_REQUEST_CODE) {
-            if (resultCode == RESULT_CANCELED) {
-                AppUpdateCheck();
+            switch (requestCode) {
+                case RESULT_CANCELED :
+                    finish();
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -162,8 +254,7 @@ public class MainActivity extends AppCompatActivity {
         Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
 
         appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-                    && appUpdateInfo.isUpdateTypeAllowed(IMMEDIATE)) {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(IMMEDIATE)) {
                 // Request the update.
                 try {
                     appUpdateManager.startUpdateFlowForResult(
@@ -176,6 +267,45 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private PurchasesUpdatedListener purchasesUpdatedListener = new PurchasesUpdatedListener() {
+        @Override
+        public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
+            // To be implemented in a later section.
+            Log.e(TAG, "onPurchasesUpdated");
+
+            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK
+                    && purchases != null) {
+                for (Purchase purchase : purchases) {
+                    handlePurchase(purchase);
+                }
+            } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED) {
+                // Handle an error caused by a user cancelling the purchase flow.
+            } else {
+                // Handle any other error codes.
+            }
+        }
+    };
+
+    void handlePurchase(Purchase purchase) {
+        ConsumeParams consumeParams =
+                ConsumeParams.newBuilder()
+                        .setPurchaseToken(purchase.getPurchaseToken())
+                        .build();
+
+        ConsumeResponseListener listener = new ConsumeResponseListener() {
+            @Override
+            public void onConsumeResponse(BillingResult billingResult, String purchaseToken) {
+                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    // Handle the success of the consume operation.
+                    Log.e(TAG, "onConsumeResponse");
+                    Toast.makeText(MainActivity.this, "감사합니다.", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+
+        billingClient.consumeAsync(consumeParams, listener);
     }
 
     // Px to Dp
